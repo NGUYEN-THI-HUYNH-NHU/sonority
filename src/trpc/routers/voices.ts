@@ -40,7 +40,7 @@ export const voicesRouter = createTRPCRouter({
             orgId: ctx.orgId,
             ...searchFilter,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: "asc" },
           select: {
             id: true,
             name: true,
@@ -55,7 +55,7 @@ export const voicesRouter = createTRPCRouter({
             variant: "SYSTEM",
             ...searchFilter,
           },
-          orderBy: { name: "desc" },
+          orderBy: { name: "asc" },
           select: {
             id: true,
             name: true,

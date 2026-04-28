@@ -28,23 +28,32 @@ export function VoiceSelector() {
   const voiceId = useStore(form.store, (s) => s.values.voiceId);
   const isSubmitting = useStore(form.store, (s) => s.isSubmitting);
 
-  const selectedVoice = voices.find((v) => v.id === voiceId);
-  const hasMissingSelectedVoice = Boolean(voiceId) && !selectedVoice;
-  const currentVoice = selectedVoice
-    ? selectedVoice
-    : hasMissingSelectedVoice
+  // Filter out voices with empty IDs to avoid Select validation error
+  const filteredCustomVoices = customVoices.filter((v) => v.id && v.id.trim());
+  const filteredSystemVoices = systemVoices.filter((v) => v.id && v.id.trim());
+  const filteredVoices = voices.filter((v) => v.id && v.id.trim());
+
+  const filteredSelectedVoice = filteredVoices.find((v) => v.id === voiceId);
+  const filteredHasMissingSelectedVoice =
+    Boolean(voiceId) && !filteredSelectedVoice;
+  const currentVoice = filteredSelectedVoice
+    ? filteredSelectedVoice
+    : filteredHasMissingSelectedVoice
       ? {
           id: voiceId,
           name: "Unavailable voice",
           category: null as null,
         }
-      : voices[0];
+      : filteredVoices[0];
+
+  // Use currentVoice.id if voiceId is empty to avoid Select validation error
+  const selectValue = voiceId || currentVoice?.id || "";
 
   return (
     <Field>
       <FieldLabel>Voice style</FieldLabel>
       <Select
-        value={voiceId}
+        value={selectValue}
         onValueChange={(v) => form.setFieldValue("voiceId", v)}
         disabled={isSubmitting}
       >
@@ -63,7 +72,7 @@ export function VoiceSelector() {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {hasMissingSelectedVoice && currentVoice && (
+          {filteredHasMissingSelectedVoice && currentVoice && (
             <>
               <SelectGroup>
                 <SelectLabel>Selected Voice</SelectLabel>
@@ -79,15 +88,14 @@ export function VoiceSelector() {
                   </span>
                 </SelectItem>
               </SelectGroup>
-              {(customVoices.length > 0 || systemVoices.length > 0) && (
-                <SelectSeparator />
-              )}
+              {(filteredCustomVoices.length > 0 ||
+                filteredSystemVoices.length > 0) && <SelectSeparator />}
             </>
           )}
-          {customVoices.length > 0 && (
+          {filteredCustomVoices.length > 0 && (
             <SelectGroup>
               <SelectLabel>Team Voices</SelectLabel>
-              {customVoices.map((v) => (
+              {filteredCustomVoices.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">
@@ -97,13 +105,12 @@ export function VoiceSelector() {
               ))}
             </SelectGroup>
           )}
-          {customVoices.length > 0 && systemVoices.length > 0 && (
-            <SelectSeparator />
-          )}
-          {systemVoices.length > 0 && (
+          {filteredCustomVoices.length > 0 &&
+            filteredSystemVoices.length > 0 && <SelectSeparator />}
+          {filteredSystemVoices.length > 0 && (
             <SelectGroup>
               <SelectLabel>Built-in Voices</SelectLabel>
-              {systemVoices.map((v) => (
+              {filteredSystemVoices.map((v) => (
                 <SelectItem key={v.id} value={v.id}>
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">

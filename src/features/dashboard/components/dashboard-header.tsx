@@ -18,17 +18,17 @@ export function DashboardHeader() {
         </h1>
       </div>
 
-      <div className="md:flex items-center gap-3 hidden">
+      <div className="lg:flex items-center gap-3 hidden">
         <Button variant="outline" size="sm" asChild>
           <Link href="mailto:business@codewithantonio.com">
             <ThumbsUp />
-            <span className="hidden md:block">Feedback</span>
+            <span className="hidden lg:block">Feedback</span>
           </Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
           <Link href="mailto:business@codewithantonio.com">
             <Headphones />
-            <span className="hidden md:block">Need help?</span>
+            <span className="hidden lg:block">Need help?</span>
           </Link>
         </Button>
       </div>
