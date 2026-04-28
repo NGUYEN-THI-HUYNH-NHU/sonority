@@ -10,7 +10,7 @@ import {
 } from "@/features/text-to-speech/components/text-to-speech-form";
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { TTSVoicesProvider } from "../contexts/tts-voices-context";
+import { TTSVoicesProvider } from "@/features/text-to-speech/contexts/tts-voices-context";
 
 export function TextToSpeechView({
   initialValues,
