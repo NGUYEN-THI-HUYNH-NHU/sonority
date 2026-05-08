@@ -3,7 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import React, { useState } from "react";
 import { toast } from "sonner";
-import z, { file } from "zod";
+import z from "zod";
 import { useDropzone } from "react-dropzone";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {

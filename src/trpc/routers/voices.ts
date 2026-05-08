@@ -1,4 +1,5 @@
 import { deleteAudio } from "@/lib/r2";
+import { withPrismaRetry } from "@/lib/db";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { createTRPCRouter, orgProcedure } from "../init";
@@ -34,37 +35,41 @@ export const voicesRouter = createTRPCRouter({
         : {};
 
       const [custom, system] = await Promise.all([
-        prisma.voice.findMany({
-          where: {
-            variant: "CUSTOM",
-            orgId: ctx.orgId,
-            ...searchFilter,
-          },
-          orderBy: { createdAt: "asc" },
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            category: true,
-            language: true,
-            variant: true,
-          },
-        }),
-        prisma.voice.findMany({
-          where: {
-            variant: "SYSTEM",
-            ...searchFilter,
-          },
-          orderBy: { name: "asc" },
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            category: true,
-            language: true,
-            variant: true,
-          },
-        }),
+        withPrismaRetry(() =>
+          prisma.voice.findMany({
+            where: {
+              variant: "CUSTOM",
+              orgId: ctx.orgId,
+              ...searchFilter,
+            },
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              category: true,
+              language: true,
+              variant: true,
+            },
+          }),
+        ),
+        withPrismaRetry(() =>
+          prisma.voice.findMany({
+            where: {
+              variant: "SYSTEM",
+              ...searchFilter,
+            },
+            orderBy: { name: "asc" },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              category: true,
+              language: true,
+              variant: true,
+            },
+          }),
+        ),
       ]);
 
       return { custom, system };
