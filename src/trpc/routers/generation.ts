@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
 import { chatterbox } from "@/lib/chatterbox-client";
 import { prisma } from "@/lib/db";
@@ -83,6 +84,12 @@ export const generationsRouter = createTRPCRouter({
         parseAs: "arrayBuffer",
       });
 
+      Sentry.logger.info("Generation started", {
+        orgId: ctx.orgId,
+        voiceId: input.voiceId,
+        textLength: input.text.length,
+      });
+
       if (error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -126,11 +133,21 @@ export const generationsRouter = createTRPCRouter({
             r2ObjectKey,
           },
         });
+
+        Sentry.logger.info("Audio started", {
+          orgId: ctx.orgId,
+          voiceId: input.voiceId,
+        });
       } catch {
         if (generationId)
           await prisma.generation
             .delete({ where: { id: generationId } })
             .catch(() => {});
+
+        Sentry.logger.info("Generation failed", {
+          orgId: ctx.orgId,
+          voiceId: input.voiceId,
+        });
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
