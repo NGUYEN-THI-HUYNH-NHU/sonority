@@ -69,7 +69,11 @@ export function TextInputPanel() {
               <Coins className="size-3 text-chart-5" />
               <span className="text-xs">
                 <span className="tabular-nums">
-                  ${(text.length * COST_PER_UNIT).toFixed(4)}
+                  {(text.length * COST_PER_UNIT).toLocaleString("en-US", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  &#8363;
                 </span>
                 &nbsp; estimated
               </span>
