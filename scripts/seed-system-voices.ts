@@ -16,7 +16,7 @@ import {
   type VoiceCategory,
 } from "../src/generated/prisma/client";
 
-import { CANONICAL_SYSTEM_VOICE_NAMES } from "@/features/voices/data/voice-scoping";
+import { CANONICAL_SYSTEM_VOICE_NAMES } from "../src/features/voices/data/voice-scoping";
 
 const SYSTEM_VOICES_DIR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -25,10 +25,10 @@ const SYSTEM_VOICES_DIR = path.join(
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
-  MINIO_ENDPOINT: z.string().min(1),
-  MINIO_ACCESS_KEY_ID: z.string().min(1),
-  MINIO_SECRET_ACCESS_KEY: z.string().min(1),
-  MINIO_BUCKET_NAME: z.string().min(1),
+  R2_ACCOUNT_ID: z.string().min(1),
+  R2_ACCESS_KEY_ID: z.string().min(1),
+  R2_SECRET_ACCESS_KEY: z.string().min(1),
+  R2_BUCKET_NAME: z.string().min(1),
 });
 
 const env = envSchema.parse(process.env);
@@ -36,14 +36,13 @@ const env = envSchema.parse(process.env);
 const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const minioClient = new S3Client({
-  region: "us-east-1",
-  endpoint: env.MINIO_ENDPOINT,
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: env.MINIO_ACCESS_KEY_ID,
-    secretAccessKey: env.MINIO_SECRET_ACCESS_KEY,
+    accessKeyId: env.R2_ACCESS_KEY_ID,
+    secretAccessKey: env.R2_SECRET_ACCESS_KEY,
   },
-  forcePathStyle: true,
 });
 
 interface VoiceMetadata {
@@ -172,13 +171,13 @@ async function uploadSystemVoiceAudio({
   contentType: string;
 }) {
   const commandInput: PutObjectCommandInput = {
-    Bucket: env.MINIO_BUCKET_NAME,
+    Bucket: env.R2_BUCKET_NAME,
     Key: key,
     Body: buffer,
     ContentType: contentType,
   };
 
-  await minioClient.send(new PutObjectCommand(commandInput));
+  await r2.send(new PutObjectCommand(commandInput));
 }
 
 async function seedSystemVoice(name: string) {
@@ -258,11 +257,11 @@ async function seedSystemVoice(name: string) {
           id: voice.id,
         },
       })
-      .catch(() => {});
+      .catch(() => { });
 
     throw error;
   }
-}
+};
 
 async function main() {
   console.log(
